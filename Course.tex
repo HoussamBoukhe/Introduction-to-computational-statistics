@@ -1,0 +1,210 @@
+\documentclass{article}\usepackage[]{graphicx}\usepackage[]{xcolor}
+% maxwidth is the original width if it is less than linewidth
+% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlsng}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hldef}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+
+\newtheorem{lemma}{Lemma}
+\newtheorem{exercise}{Exercise}
+\newtheorem{example}{Example}
+
+
+\title{Computational Statistics, M1 MAS DS, Aix-Marseille University}
+\author{Houssam BOUKHECHAM}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+
+\maketitle
+\tableofcontents
+% Here is an example R code:
+
+% <<echo=TRUE>>=
+% x <- c(1, 2, 3, 4, 5)
+% mean(x)
+% @
+
+\newpage
+%%%%%%%%%%%%
+\section{Random variable simulation}
+
+% TODO: A small introduction 
+\cite{RobertCasela1999MonteCarloSM, gentle2009computational, tokdar2010importance}
+
+\subsection{Transformation methods}
+
+\begin{lemma}
+  Let $F:\mathbb{R} \to [0,1]$ be an non-decreasing function. 
+  If a random variable $X$ has $F$ as its cumulative distribution function (CDF), then the random variable $U = F(X) \sim U(0,1)$.
+\end{lemma}
+  
+\begin{proof}
+  % TODO
+\end{proof}
+
+
+\begin{example}[Normal variable generation]
+
+  The cumulative distribution function (CDF) of a Gaussian random variable with mean $\mu$ and standard deviation $\sigma$ is given by:  
+  \begin{equation}\label{CDF of a Gaussian(mu,sigma)}
+  F(x) = \frac{1}{\sqrt{2\pi\sigma^2}} \int_{-\infty}^x e^{-\frac{1}{2}\left(\frac{t-\mu}{\sigma}\right)^2}~dt.
+  \end{equation}  
+  The function $F$ is a diffeomorphism. Assuming $\mu = 0$ and $\sigma = 1$, an approximation $F_a^{-1}$ of the inverse function $F^{-1}$ can be computed to arbitrary precision (\cite{see RC MCSM}, Example 2.6). To generate a random sample of size $n$ from the standard Gaussian distribution, we first generate $n$ random samples from the uniform distribution, $\{u_1, u_2, \ldots, u_n\}$. Then, we map this sample to the Gaussian distribution using the inverse approximation :  
+  \[
+  \left\{F_a^{-1}(u_1), F_a^{-1}(u_2), \ldots, F_a^{-1}(u_n)\right\}.
+  \]
+  
+  \end{example}
+  
+  \begin{exercise}
+  \begin{enumerate}
+  \item[] 
+  \item Generate a sample $\mathcal{S} = \left\{u_1, u_2, \cdots, u_n\right\}$ of size $n = 500$ from the uniform distribution.
+  
+  \item Implement the function
+  \[
+  F_a^{-1}(u) = t - \frac{a_0 + a_1t}{1+b_1t+b_2t^2}, \quad u\in(0,1),
+  \]
+  where $t^2 = \log\left(u^{-2}\right)$ and $a_0 = 2.30753, a_1 = 0.27061, b_1 = 0.99229, b_2 = 0.04481$
+  
+  \item Plot the histogram of the set $F_a^{-1}(\mathcal{S})$ and comment the results.
+  
+  \item$\clubsuit$ Repeat the process for a larger value of $n$ (e.g., $n = 50000$). Compare the generated sample with a standard Gaussian random variable generator and comment the results.
+  
+  \end{enumerate}
+  \end{exercise}
+
+\subsection{Accept-reject method}
+
+\newpage
+%%%%%%%%%%%%
+\section{Importance sampling}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{set.seed}\hldef{(}\hlnum{12}\hldef{)}
+
+\hlcom{# Define the target distribution (Gamma distribution)}
+\hldef{target_dist} \hlkwb{<-} \hlkwa{function}\hldef{(}\hlkwc{x}\hldef{,} \hlkwc{shape} \hldef{=} \hlnum{2}\hldef{,} \hlkwc{rate} \hldef{=} \hlnum{1}\hldef{) \{}
+  \hlkwd{ifelse}\hldef{(x} \hlopt{>} \hlnum{0}\hldef{, x}\hlopt{^}\hldef{(shape} \hlopt{-} \hlnum{1}\hldef{)} \hlopt{*} \hlkwd{exp}\hldef{(}\hlopt{-}\hldef{rate} \hlopt{*} \hldef{x),} \hlnum{0}\hldef{)}
+\hldef{\}}
+
+\hlcom{# Define the proposal distribution (Normal distribution)}
+\hldef{proposal_dist} \hlkwb{<-} \hlkwa{function}\hldef{(}\hlkwc{x}\hldef{) \{}
+  \hlkwd{dnorm}\hldef{(x,} \hlkwc{mean} \hldef{=} \hlnum{2}\hldef{,} \hlkwc{sd} \hldef{=} \hlnum{2}\hldef{)}  \hlcom{# Normal(2, 2) PDF}
+\hldef{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# Generate samples from the proposal distribution }
+\hldef{n_samples} \hlkwb{<-} \hlnum{2000}
+
+\hlcom{# proposal sample}
+\hldef{ps} \hlkwb{<-} \hlkwd{rnorm}\hldef{(n_samples,} \hlkwc{mean} \hldef{=} \hlnum{2}\hldef{,} \hlkwc{sd} \hldef{=} \hlnum{2}\hldef{)}
+
+\hlcom{# Compute the weights for each sample}
+\hldef{weights} \hlkwb{<-} \hlkwd{target_dist}\hldef{(ps)} \hlopt{/} \hlkwd{proposal_dist}\hldef{(ps)}
+
+\hlcom{# Estimate the mean of the target distribution using IS}
+\hldef{importance_sampling_mean} \hlkwb{<-} \hlkwd{sum}\hldef{(weights} \hlopt{*} \hldef{ps)} \hlopt{/} \hlkwd{sum}\hldef{(weights)}
+\hlkwd{print}\hldef{(importance_sampling_mean)}
+\end{alltt}
+\begin{verbatim}
+## [1] 2.011539
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+%%%%%%%%%%%
+\section{Bootstrap}
+
+%%%
+\begin{exercise}
+Let $S = \lbrace x_1, x_2, \ldots, x_n \rbrace$ be a random sample from the uniform distribution on the interval $(0, \theta)$. Assume we want to estimate the unknown parameter $\theta$, so we use the estimator $X_{(n)} = \max x_i$.
+
+\begin{enumerate}
+\item If $X_1,X_2,\cdots, X_n$ are iid with uniform distribution on $(0,\theta),$ what is the distribution of the random variable $X_{(n)} = \max X_i$? 
+
+(Hint: Determine the cumulative distribution function of $X_{(n)}$)
+
+\item Is the estimator $X_{(n)}$ biased?
+
+\item How would you use the bootstrap to estimate the bias in $X_{(n)}$ for $\theta$?
+\end{enumerate}
+
+\end{exercise}
+
+%%%%%%%%%%%%
+\section{Monte Carlo methods}
+
+%%%%%%%%%%%
+\section{Gibbs algorithms for bayesian statistics}
+
+\subsection{Metropolis Hastings algorithm}
+% TODO
+
+\subsection{MCMC}
+% TODO
+
+% Bibliography 
+
+\newpage
+%\bibliography{bibliography}
+bibliography
+\end{document}
+
+
+
