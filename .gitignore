@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.RData
+*.Rhistory
+*.aux
+*.toc
+*.txt
