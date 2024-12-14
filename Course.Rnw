@@ -142,8 +142,9 @@ Let $S = \lbrace x_1, x_2, \ldots, x_n \rbrace$ be a random sample from the unif
 % Bibliography 
 
 \newpage
-%\bibliography{bibliography.bib}
-bibliography
+test
+\bibliographystyle{plain}
+\bibliography{bibliography}
 \end{document}
 
 
