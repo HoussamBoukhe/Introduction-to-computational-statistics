@@ -49,6 +49,10 @@
 \newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
 
 \usepackage{alltt}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
 \usepackage{amsthm}
 \usepackage{amsmath}
 \usepackage{amsfonts}
@@ -56,6 +60,8 @@
 \newtheorem{lemma}{Lemma}
 \newtheorem{exercise}{Exercise}
 \newtheorem{example}{Example}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
 
 
 \title{Computational Statistics, M1 MAS DS, Aix-Marseille University}
@@ -123,6 +129,41 @@
   \end{exercise}
 
 \subsection{Accept-reject method}
+In the previous subsection, we discussed how to generate Gaussian and exponential distributions from a uniform distribution, but in doing so, we needed an approximation of the inverse of the CDF. In general, the analytic form of the inverse of the CDF is not available, and even if the analytic form exists, approximation of this function may be computationally expensive. An alternative to transformation methods, is the \textit{Accept-Reject} method.
+Roughly speaking, this method is a technique for generating a sample from a target distribution with density $f$, when direct sampling from it is not possible. Instead, we use a proposal distribution with density $g$, from which we generate $x$, and depending on the values of $g(x)$ and $f(x)$, we either accept $x$ as a sample of $f$ or reject it. More precisely if $f$ has a compact support and is bounded then we have 
+
+
+\begin{theorem}[Fundamental theorem of simulation]\label{Accept-Reject theorem}
+Let $f$ be a target density. Then simulating $X\sim f$ is equivalent to simulating 
+\begin{equation}\label{Fund thm of sim eq}
+\left(X, U\right) \sim \mathcal{U}\left\{(x,u)~:~0< u < f(x)\right\}.
+\end{equation}
+
+\end{theorem}
+
+To simulate $X \sim f$, we first determine the maximum value $m$ of $f$. Next, we generate a pair $(x, u)$ from a uniform distribution over the rectangle $[a, b] \times [0, m]$, where $[a,b]$ is the support of $f$. The value $x$ is accepted if $u \leq f(x)$; otherwise, it is rejected.
+
+
+\begin{example}
+...
+\end{example}
+
+\begin{corollary}\label{Accept-Reject theorem}
+...
+\end{corollary}
+
+Using Theorem \ref{Accept-Reject theorem}, the Accept-Reject method can be done as follows
+
+\begin{algorithm}[H]
+\caption{Accept-Reject}
+\label{alg:accept-reject}
+\begin{algorithmic}[1]
+\State Choose \( M \geq 1 \) such that \( f(x) \leq M g(x) \) for all \( x \).
+\State \label{step:generate} Generate \( X \sim g \) and \( u \sim \mathcal{U}[0,1] \).
+\State If \( u \leq \frac{f(X)}{M g(X)} \), accept \( Y = X \) and \textbf{return} \( Y \).
+\State Otherwise, go back to step \ref{step:generate}.
+\end{algorithmic}
+\end{algorithm}
 
 \newpage
 %%%%%%%%%%%%
