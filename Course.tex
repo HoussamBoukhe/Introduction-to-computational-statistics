@@ -128,12 +128,54 @@
   \end{enumerate}
   \end{exercise}
 
+
+\begin{exercise}
+
+\begin{enumerate}
+\item[]
+\item Assume we can simulate $\mathcal{N}(0,1)$, how to generate a sample from $\mathcal{N}(\mu,\sigma^2)$?
+\item Implement this method in R or Python.
+\end{enumerate}
+
+\end{exercise}
+
+\begin{exercise}
+
+Let $\lambda>0$ and $U$ be a random variable uniformly distributed on the interval $[0,1]$.
+\begin{enumerate}
+\item Prove that the random variable defined by $X = -\frac{\log(U)}{\lambda}$ follows an exponential distribution with scale parameter $\lambda$, denoted as $\mathcal{E}xp(\lambda)$.
+\item Using the uniform distribution and the result from the previous question, generate a sample of size $n=100$ from $\mathcal{E}xp(1)$.
+\item Compare the generated sample with a sample produced by a function in R or Python.
+\end{enumerate}
+\end{exercise}
+
+\begin{exercise}
+Let $N$ be a random variable with a Poisson distribution $\mathcal{P}(\lambda)$, and let $X_i$ be i.i.d. random variables with an $\mathcal{E}xp(\lambda)$ distribution.
+\begin{enumerate}
+\item Prove that 
+\begin{equation*}
+Pr(N = k) = Pr(X_1+\cdots+X_k \leq 1 < X_1 + \cdots + X_{k+1}).
+\end{equation*}
+\item Using the previous question, outline the steps to simulate a Poisson distribution $\mathcal{P}(\lambda)$, and then implement your algorithm in R or Python.
+\item $\clubsuit$ Do you recommend this method when $\lambda$ is large ?
+\end{enumerate}
+\end{exercise}
+
+\begin{exercise}
+\begin{enumerate}
+\item[]
+\item Sketch how to generate a discrete random variable using the uniform distribution.
+\item Generate a sample of size 30 from the binomial distribution with 10 trials and a success rate of 0.3, denoted by $B(n,p)$, where $n = 10$ and $p = 0.3$.
+\end{enumerate}
+\end{exercise}
+
+%%%
 \subsection{Accept-reject method}
 In the previous subsection, we discussed how to generate Gaussian and exponential distributions from a uniform distribution, but in doing so, we needed an approximation of the inverse of the CDF. In general, the analytic form of the inverse of the CDF is not available, and even if the analytic form exists, approximation of this function may be computationally expensive. An alternative to transformation methods, is the \textit{Accept-Reject} method.
 Roughly speaking, this method is a technique for generating a sample from a target distribution with density $f$, when direct sampling from it is not possible. Instead, we use a proposal distribution with density $g$, from which we generate $x$, and depending on the values of $g(x)$ and $f(x)$, we either accept $x$ as a sample of $f$ or reject it. More precisely if $f$ has a compact support and is bounded then we have 
 
 
-\begin{theorem}[Fundamental theorem of simulation]\label{Accept-Reject theorem}
+\begin{theorem}[Fundamental theorem of simulation]\label{Fundamental theorem of simulation}
 Let $f$ be a target density. Then simulating $X\sim f$ is equivalent to simulating 
 \begin{equation}\label{Fund thm of sim eq}
 \left(X, U\right) \sim \mathcal{U}\left\{(x,u)~:~0< u < f(x)\right\}.
@@ -141,18 +183,55 @@ Let $f$ be a target density. Then simulating $X\sim f$ is equivalent to simulati
 
 \end{theorem}
 
-To simulate $X \sim f$, we first determine the maximum value $m$ of $f$. Next, we generate a pair $(x, u)$ from a uniform distribution over the rectangle $[a, b] \times [0, m]$, where $[a,b]$ is the support of $f$. The value $x$ is accepted if $u \leq f(x)$; otherwise, it is rejected.
+To simulate $X \sim f$, we first choose a value $M$ bigger than the maximum of $f$. Next, we generate a pair $(x, u)$ from a uniform distribution over the rectangle $[a, b] \times [0, M]$, where $[a,b]$ is the support of $f$. The value $x$ is accepted if $u \leq f(x)$; otherwise, it is rejected.
 
 
-\begin{example}
-...
+
+\begin{example}[Generation of Beta($2,4$) sample] The target density $f$ of $Beta(2,4)$ is given by 
+\begin{equation}\label{Target_density_Beta}
+f(x) =
+\begin{cases} 
+20 x(1-x)^3, & \text{if } x \in (0,1), \\ 
+0, & \text{otherwise}.
+\end{cases}
+\end{equation}
+
+So, if we take $M=\frac{11}{5}$, then $f\leq M.$ If we apply the Accept-Reject algorithm  for 1000 iteration, we get Figure \ref{fig:GeneratingBetaDistr}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Figures/Accept-Reject generation of a Beta sample.png}
+    \caption{Generating Beta(2,4) using the Accept-Reject method. The Red point are rejected, while the blue ones are accepted.}
+    \label{fig:GeneratingBetaDistr}
+\end{figure}
+
 \end{example}
 
-\begin{corollary}\label{Accept-Reject theorem}
-...
+% Generating Beta distribution
+\begin{exercise}
+\begin{enumerate}
+\item[]
+\item Using the \textit{Accept-Reject} method, generate a sample of size $n = 1000$.
+\item How many iteration do we need on average to generate $n$ sample ?
+\end{enumerate}
+\end{exercise}
+
+Now, if we assume that the target density does not have a compact support ($f$ is equal to zero outside an interval $[a,b]$), then we can't apply the previous technique. So we have to bound $f$ by a distribution $g$ which we can sample from (for example a Normal distribution), more precisely Theorem \ref{Fundamental theorem of simulation} implies 
+
+\begin{corollary}\label{Accept-reject theo corr}
+Let $f$ be a target density and $g$ a density which we can sample from. Assume that there is $M\in \mathbb{R}$ such that 
+\begin{equation*}
+f(x) \leq M g(x), ~\forall x.
+\end{equation*}
+
+Then to simulate $X \sim f$, we simulate 
+\begin{equation*}
+Y \sim g,\quad U|Y \sim \mathcal{U}\big(0,M\cdot g(Y)\big),
+\end{equation*}
+until $ u < f(y)$.
 \end{corollary}
 
-Using Theorem \ref{Accept-Reject theorem}, the Accept-Reject method can be done as follows
+Using Corollary \ref{Accept-reject theo corr}, the Accept-Reject method can be done as follows
 
 \begin{algorithm}[H]
 \caption{Accept-Reject}
@@ -164,6 +243,42 @@ Using Theorem \ref{Accept-Reject theorem}, the Accept-Reject method can be done 
 \State Otherwise, go back to step \ref{step:generate}.
 \end{algorithmic}
 \end{algorithm}
+
+\begin{exercise}
+\begin{enumerate}
+\item[] 
+\item Prove that $M\geq 1$.
+\item Using Corollary \ref{Accept-reject theo corr}, prove that Algorithm \ref{alg:accept-reject} simulates a sample with distribution $f$.
+\item Is it possible to apply the Accept-Reject method if $f$ is known only up to a multiplicative constant?
+\end{enumerate}
+\end{exercise}
+
+
+\begin{example}\label{Generating a distr bounded by the normal distribution}
+Assume we know how to sample from the normal distribution (Using transformation method), and we want to sample from the distribution 
+\begin{equation*}
+f(x) \propto \left( \cos^2(x) + 1 + 2\sin^2(2x)\right) e^{-\frac{1}{2} x^2}.
+\end{equation*}
+
+In this case 
+\begin{equation}\label{Inequality for exercise}
+f(x) \leq 4 \cdot \frac{e^{-\frac{1}{2}x^2}}{\sqrt{2\pi}} = g(x), ~\forall x \in \mathbb{R},
+\end{equation}
+where $g$ is the probability density function of the standard normal distribution. To simulate $X \sim f$, we first generate $y$ from the standard normal distribution $\mathcal{N}(0,1)$, then generate $u$ from $\mathcal{U}(0, M g(y))$. If $u < f(y)$, the value $y$ is accepted as a sample from $f$; otherwise, it is rejected.
+
+\end{example}
+
+\begin{exercise}
+\begin{enumerate}
+\item[]
+\item Prove inequality \eqref{Inequality for exercise}.
+\item Using the Accept-Reject method, generate a sample of size $n=2000$ with distribution $f(x) \propto \left( \cos^2(x) + 1 + 2\sin^2(2x)\right) e^{-\frac{1}{2} x^2}$.
+\item Is it possible to simulate a chi-squared distribution with 3 degrees of freedom, $\chi^2(3)$, using the normal distribution?
+\end{enumerate}
+
+\end{exercise}
+
+
 
 \newpage
 %%%%%%%%%%%%
@@ -229,7 +344,7 @@ Let $S = \lbrace x_1, x_2, \ldots, x_n \rbrace$ be a random sample from the unif
 \end{exercise}
 
 %%%%%%%%%%%%
-\section{Monte Carlo methods}
+%\section{Monte Carlo methods}
 
 %%%%%%%%%%%
 \section{Gibbs algorithms for bayesian statistics}

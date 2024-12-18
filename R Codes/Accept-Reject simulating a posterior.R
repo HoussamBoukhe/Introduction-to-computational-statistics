@@ -1,4 +1,4 @@
-# TODO: Write the likelihood, prior and the posterior in latex 
+# TODO: Write the likelihood, prior and the posterior, then generate a sample from the posterior distribution
 # Exercice 2.29 Robert Casela Monte Carlo method
 
 set.seed(12)
