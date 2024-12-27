@@ -9,10 +9,10 @@ knit("Course.Rnw")  # First, knit the .Rnw file into .tex
 system("pdflatex Course.tex")
 
 # Run bibtex to generate the bibliography
-#system("bibtex Course")
+system("bibtex Course")
 
 # Run pdflatex twice to resolve all references
-#system("pdflatex Course.tex")
-#system("pdflatex Course.tex")
+system("pdflatex Course.tex")
+system("pdflatex Course.tex")
 
 #system("start Course.pdf")

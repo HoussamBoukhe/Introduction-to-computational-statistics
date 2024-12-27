@@ -62,6 +62,7 @@
 \newtheorem{example}{Example}
 \newtheorem{theorem}{Theorem}
 \newtheorem{corollary}{Corollary}
+\newtheorem{definition}{Definition}
 
 
 \title{Computational Statistics, M1 MAS DS, Aix-Marseille University}
@@ -81,9 +82,11 @@
 \newpage
 %%%%%%%%%%%%
 \section{Random variable simulation}
+Are the numbers generated with a Python or R command truly random? In this section, two methods for simulating random variables are presented: the \textit{Transformation} method and the \textit{Accept-Reject} method.  
+The key idea behind both methods is to begin with a uniform random variable in $(0,1)$ as a foundation for generating samples from more complex distributions. One approach to obtaining such a uniform random variable is through the use of chaotic dynamical systems, such as the \textit{logistic map} or the \textit{doubling map}, which exhibit randomness in their behavior. The interested reader can find more motivations and details in \cite{RobertCasela1999MonteCarloSM}.
 
-% TODO: A small introduction 
-\cite{RobertCasela1999MonteCarloSM, gentle2009computational, tokdar2010importance}
+
+%\cite{RobertCasela1999MonteCarloSM, gentle2009computational, tokdar2010importance}
 
 \subsection{Transformation methods}
 
@@ -103,7 +106,7 @@
   \begin{equation}\label{CDF of a Gaussian(mu,sigma)}
   F(x) = \frac{1}{\sqrt{2\pi\sigma^2}} \int_{-\infty}^x e^{-\frac{1}{2}\left(\frac{t-\mu}{\sigma}\right)^2}~dt.
   \end{equation}  
-  The function $F$ is a diffeomorphism. Assuming $\mu = 0$ and $\sigma = 1$, an approximation $F_a^{-1}$ of the inverse function $F^{-1}$ can be computed to arbitrary precision (\cite{see RC MCSM}, Example 2.6). To generate a random sample of size $n$ from the standard Gaussian distribution, we first generate $n$ random samples from the uniform distribution, $\{u_1, u_2, \ldots, u_n\}$. Then, we map this sample to the Gaussian distribution using the inverse approximation :  
+  The function $F$ is a diffeomorphism. Assuming $\mu = 0$ and $\sigma = 1$, an approximation $F_a^{-1}$ of the inverse function $F^{-1}$ can be computed to arbitrary precision (\cite{RobertCasela1999MonteCarloSM}, Example 2.6). To generate a random sample of size $n$ from the standard Gaussian distribution, we first generate $n$ random samples from the uniform distribution, $\{u_1, u_2, \ldots, u_n\}$. Then, we map this sample to the Gaussian distribution using the inverse approximation :  
   \[
   \left\{F_a^{-1}(u_1), F_a^{-1}(u_2), \ldots, F_a^{-1}(u_n)\right\}.
   \]
@@ -211,7 +214,7 @@ So, if we take $M=\frac{11}{5}$, then $f\leq M.$ If we apply the Accept-Reject a
 \begin{exercise}
 \begin{enumerate}
 \item[]
-\item Using the \textit{Accept-Reject} method, generate a sample of size $n = 1000$.
+\item Using the \textit{Accept-Reject} method, generate a sample of size $n = 1000$ from Beta(3,5).
 \item How many iteration do we need on average to generate $n$ sample ?
 \end{enumerate}
 \end{exercise}
@@ -262,9 +265,9 @@ f(x) \propto \left( \cos^2(x) + 1 + 2\sin^2(2x)\right) e^{-\frac{1}{2} x^2}.
 
 In this case 
 \begin{equation}\label{Inequality for exercise}
-f(x) \leq 4 \cdot \frac{e^{-\frac{1}{2}x^2}}{\sqrt{2\pi}} = g(x), ~\forall x \in \mathbb{R},
+f(x) \leq 4 \cdot \frac{e^{-\frac{1}{2}x^2}}{\sqrt{2\pi}} = 4\cdot g(x), ~\forall x \in \mathbb{R},
 \end{equation}
-where $g$ is the probability density function of the standard normal distribution. To simulate $X \sim f$, we first generate $y$ from the standard normal distribution $\mathcal{N}(0,1)$, then generate $u$ from $\mathcal{U}(0, M g(y))$. If $u < f(y)$, the value $y$ is accepted as a sample from $f$; otherwise, it is rejected.
+where $g$ is the probability density function of the standard normal distribution. To simulate $X \sim f$, we first generate $y$ from the standard normal distribution $\mathcal{N}(0,1)$, then generate $u$ from $\mathcal{U}(0, 4\cdot g(y))$. If $u < f(y)$, the value $y$ is accepted as a sample from $f$; otherwise, it is rejected.
 
 \end{example}
 
@@ -284,23 +287,97 @@ where $g$ is the probability density function of the standard normal distributio
 %%%%%%%%%%%%
 \section{Importance sampling}
 
+Let $f$ be a probability density function, and assume we are interested in computing the quantity:
+\begin{equation}\label{IS quantity of interest}
+\mu_f = \int h(x)f(x)~dx,
+\end{equation}
+where $h$ is a problem-specific function (e.g., a loss function in Bayesian statistics). A natural approach to approximate \eqref{IS quantity of interest} is to use the \textit{Monte Carlo} method. This involves drawing a sample $X_1, \dots, X_n$ from $f$ and estimating $\mu_f$ using:
+\begin{equation}\label{MC est of IS qoi}
+\hat{\mu}_f = \frac{1}{n} \sum\limits_{i=1}^n h(X_i).
+\end{equation}
+
+A major challenge in this case is that we may not know how to sample from $f$. Additionally, even if sampling from $f$ is possible, the function $h$ might have a very small support relative to $f$. As a result, a large sample size $n$ is required to achieve a good approximation.
+
+\begin{example}\label{Estimation of the tail of standard normal dist MC vs IS}
+Consider $f$, the probability density function (PDF) of the standard normal distribution, and let $h(x) = I_{[2.5, +\infty)}(x)$, where $I_A$ is the indicator function defined as $I_A(x) = 1$ if $x \in A$ and $I_A(x) = 0$ otherwise.
+
+The quantity of interest in this case is:
+\begin{equation*}
+\mu_f = \int_{[2.5, +\infty)} \frac{1}{\sqrt{2\pi}} e^{-\frac{1}{2}x^2}~dx = 1 - \Phi(2.5),
+\end{equation*}
+where $\Phi$ denotes the cumulative distribution function (CDF) of $f$. Using a direct Monte Carlo estimation requires a large number of iterations to achieve an accuracy of 0.001. In contrast, importance sampling achieves this accuracy with fewer iterations, as demonstrated in Figure \ref{MC est of tail vs IS}. 
+
+\begin{figure}[h!]
+    \centering
+    \begin{minipage}{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Figures/Estimating tail probability with direct Monte Carlo experiment.png}
+        \caption{Estimating tail probability with Monte Carlo.}
+    \end{minipage}
+    \hspace{1cm} % Adjust space between the two images
+    \begin{minipage}{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Figures/Estimating tail probability with Importance sampling.png}
+        \caption{Estimating tail probability with Importance Sampling.}
+    \end{minipage}
+    \label{MC est of tail vs IS}
+\end{figure}
+
+\end{example}
+
+
+\begin{definition}
+\textit{Importance Sampling} is a method used to evaluate the quantity in \eqref{IS quantity of interest}. This is achieved by generating a sample $X_1, \dots, X_n$ from an \textit{instrumental} distribution $g$, and then using the following approximation:
+\begin{equation}\label{IP approximation of an integral}
+\mu_f = E_f\left[h(X)\right] \approx \frac{1}{n} \sum\limits_{i=1}^n h(X_i)\frac{f(X_i)}{g(X_i)}:=\hat{\mu}_f.
+\end{equation}
+\end{definition}
+
+Using LLN, $\hat{\mu}_f$ converges almost surely to $\mu_f$, in particular the estimator $\hat{\mu}_f$ is \textit{non-biased}.
+
+\begin{exercise}
+\begin{enumerate}
+    \item[]
+    \item Reproduce the estimations shown in Figure \ref{MC est of tail vs IS} (Use $\mathcal{E}xp(1)$ as an instrumental distribution).
+    \item $\clubsuit$ How many iterations are required in each case to achieve a precision of 0.0001?
+\end{enumerate}
+\end{exercise}
+
+Assume we know the density $f$ only up to multiplicative constant (for example the posterior density), in this case we can't use formula \ref{IP approximation of an integral}, an alternative is to consider the estimation 
+\begin{equation}\label{IP appr 2nd lambda*f}
+\tilde{\mu}_f := \frac{\sum\limits_i \frac{f(X_i)}{g(X_i)}h(X_i)}{\sum\limits_i\frac{f(X_i)}{g(X_i)}}.
+\end{equation}
+
+Notice that in equation \eqref{IP appr 2nd lambda*f}, the function $f$ is required only up to a multiplicative constant. This estimator also converges almost surely to $\mu_f$. Interested readers can find further details and developments on the topic of importance sampling in \cite{tokdar2010importance}.
+
+\begin{example}
+In this example, we aim to approximate the mean of \text{Gamma}$(2.5,1)$. Although the mean can be computed directly as $2.5$, we use importance sampling for illustrative purposes. The instrumental distribution chosen is $\mathcal{N}(2,2)$.
+
+A function proportional to the PDF of $\text{Gamma}(2.5,1)$ can be implemented in R as follows:
+
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlkwd{set.seed}\hldef{(}\hlnum{12}\hldef{)}
 
 \hlcom{# Define the target distribution (Gamma distribution)}
-\hldef{target_dist} \hlkwb{<-} \hlkwa{function}\hldef{(}\hlkwc{x}\hldef{,} \hlkwc{shape} \hldef{=} \hlnum{2}\hldef{,} \hlkwc{rate} \hldef{=} \hlnum{1}\hldef{) \{}
+\hldef{target_dist} \hlkwb{<-} \hlkwa{function}\hldef{(}\hlkwc{x}\hldef{,} \hlkwc{shape} \hldef{=} \hlnum{2.5}\hldef{,} \hlkwc{rate} \hldef{=} \hlnum{1}\hldef{) \{}
   \hlkwd{ifelse}\hldef{(x} \hlopt{>} \hlnum{0}\hldef{, x}\hlopt{^}\hldef{(shape} \hlopt{-} \hlnum{1}\hldef{)} \hlopt{*} \hlkwd{exp}\hldef{(}\hlopt{-}\hldef{rate} \hlopt{*} \hldef{x),} \hlnum{0}\hldef{)}
 \hldef{\}}
 
-\hlcom{# Define the proposal distribution (Normal distribution)}
-\hldef{proposal_dist} \hlkwb{<-} \hlkwa{function}\hldef{(}\hlkwc{x}\hldef{) \{}
+\hlcom{# Define the instrumental distribution (Normal distribution)}
+\hldef{instr_dist} \hlkwb{<-} \hlkwa{function}\hldef{(}\hlkwc{x}\hldef{) \{}
   \hlkwd{dnorm}\hldef{(x,} \hlkwc{mean} \hldef{=} \hlnum{2}\hldef{,} \hlkwc{sd} \hldef{=} \hlnum{2}\hldef{)}  \hlcom{# Normal(2, 2) PDF}
 \hldef{\}}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
+
+If we denote $\frac{f(X_i)}{g(X_i)}$ by $\omega_i$ and set $h$ as the identity map, the approximation in \eqref{IP appr 2nd lambda*f} simplifies to:
+\begin{equation}
+\tilde{\mu}_f = \frac{\sum_i \omega_i X_i}{\sum_i \omega_i},
+\end{equation}
+and the approximation can be implemented as follows 
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -312,19 +389,33 @@ where $g$ is the probability density function of the standard normal distributio
 \hldef{ps} \hlkwb{<-} \hlkwd{rnorm}\hldef{(n_samples,} \hlkwc{mean} \hldef{=} \hlnum{2}\hldef{,} \hlkwc{sd} \hldef{=} \hlnum{2}\hldef{)}
 
 \hlcom{# Compute the weights for each sample}
-\hldef{weights} \hlkwb{<-} \hlkwd{target_dist}\hldef{(ps)} \hlopt{/} \hlkwd{proposal_dist}\hldef{(ps)}
+\hldef{weights} \hlkwb{<-} \hlkwd{target_dist}\hldef{(ps)} \hlopt{/} \hlkwd{instr_dist}\hldef{(ps)}
 
 \hlcom{# Estimate the mean of the target distribution using IS}
 \hldef{importance_sampling_mean} \hlkwb{<-} \hlkwd{sum}\hldef{(weights} \hlopt{*} \hldef{ps)} \hlopt{/} \hlkwd{sum}\hldef{(weights)}
 \hlkwd{print}\hldef{(importance_sampling_mean)}
 \end{alltt}
 \begin{verbatim}
-## [1] 2.011539
+## [1] 2.487901
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
 
+\end{example}
+
+\begin{exercise}
+Using importance sampling:
+\begin{enumerate}
+    \item Approximate the variance of $\text{Gamma}(2.5, 1)$ to a precision of 0.001.
+    \item $\clubsuit$ Give an approximation of $P(X > 5.298317)$, where $X \sim \text{Gamma}(1, 1)$, to a precision of 0.001.
+\end{enumerate}
+\end{exercise}
+
+
+
+
 %%%%%%%%%%%
+\newpage
 \section{Bootstrap}
 
 %%%
@@ -358,7 +449,7 @@ Let $S = \lbrace x_1, x_2, \ldots, x_n \rbrace$ be a random sample from the unif
 % Bibliography 
 
 \newpage
-test
+
 \bibliographystyle{plain}
 \bibliography{bibliography}
 \end{document}
