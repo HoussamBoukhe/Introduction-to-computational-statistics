@@ -1,3 +1,6 @@
+### Bootstrap confidence interval for an exponential family
+
+# True value of parameter of interest 
 theta <- 10
 
 n <- 25 # 25, 50, 100
@@ -34,8 +37,8 @@ theta.bci <- function(data, B = 9999, alpha = 0.05, seed = NULL){
   return(bci)
 }
 
-# Monte carlo experiment to compute the coverage probability
-M <- 50
+# Monte Carlo experiment to compute the coverage probability
+M <- 100
 
 # Number of covering of theta using asymptotic CI
 cov.aci <- 0 
