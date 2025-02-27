@@ -432,13 +432,20 @@ Let $X_1,\cdots, X_n$ be a random sample from an exponential distribution with p
 
 %%%%%%%%%%%
 \newpage
-\section{Gibbs algorithms for bayesian statistics}
+\section{Monte Carlo optimization}
 
-\subsection{Metropolis Hastings algorithm}
+\subsection{Stochastic Gradient descente}
+% TODO 
+
+
+
+\subsection{Markov chain Monte Carlo algorithm (MCMC)}
+
+\subsubsection{Gibbs measures}
 % TODO
 
-\subsection{MCMC}
 % TODO
+
 
 % Bibliography 
 
